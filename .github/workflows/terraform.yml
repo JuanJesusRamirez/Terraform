@@ -98,12 +98,8 @@ jobs:
             if [ "$PROVISIONING_STATE" == "Succeeded" ]; then
               echo "Container App is in succeeded state - importing into Terraform state..."
               
-              # Create import script
-              echo '#!/bin/bash' > import.sh
-              echo "terraform import azurerm_container_app.app /subscriptions/${{ steps.extract-sp.outputs.subscription_id }}/resourceGroups/RG_RALFV2/providers/Microsoft.App/containerApps/caralfuatv2" >> import.sh
-              
-              chmod +x import.sh
-              ./import.sh
+              # Use the existing import script
+              bash ./terraform/import.sh
             else
               echo "Container App exists but is in $PROVISIONING_STATE state - can't import"
               echo "Deleting failed Container App to allow fresh deployment..."
