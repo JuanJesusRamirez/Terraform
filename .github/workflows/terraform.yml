@@ -91,14 +91,21 @@ jobs:
       id: acr-login
       run: |
         cd ./terraform
-        # Use a cleaner way to extract just the ACR login server value
-        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server | tr -d '\n')
-        echo "ACR Login Server: $ACR_LOGIN_SERVER"
+        # Explicitly save the output to a variable with proper command execution
+        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
+        
+        # Trim any whitespace
+        ACR_LOGIN_SERVER=$(echo "$ACR_LOGIN_SERVER" | xargs)
+        
+        # Debug output to verify what we captured
+        echo "Debug - Raw ACR Login Server: '$ACR_LOGIN_SERVER'"
+        
         # Verify the value looks correct
         if [[ ! "$ACR_LOGIN_SERVER" =~ .*\.azurecr\.io$ ]]; then
-          echo "Error: Invalid ACR login server format: $ACR_LOGIN_SERVER"
+          echo "Error: Invalid ACR login server format: '$ACR_LOGIN_SERVER'"
           exit 1
         fi
+        
         # Set as environment variable and output
         echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
         echo "server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
