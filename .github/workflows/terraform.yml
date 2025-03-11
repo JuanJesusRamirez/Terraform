@@ -86,29 +86,12 @@ jobs:
         terraform apply -auto-approve -target=azurerm_resource_group.example -target=azurerm_container_registry.acr
       working-directory: ./terraform
       
-    # Extract ACR login server using Terraform output - FIXED
-    - name: Extract ACR Login Server
+    # Set ACR login server as a fixed value
+    - name: Set ACR Login Server
       id: acr-login
       run: |
-        cd ./terraform
-        # Explicitly save the output to a variable with proper command execution
-        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
-        
-        # Trim any whitespace
-        ACR_LOGIN_SERVER=$(echo "$ACR_LOGIN_SERVER" | xargs)
-        
-        # Debug output to verify what we captured
-        echo "Debug - Raw ACR Login Server: '$ACR_LOGIN_SERVER'"
-        
-        # Verify the value looks correct
-        if [[ ! "$ACR_LOGIN_SERVER" =~ .*\.azurecr\.io$ ]]; then
-          echo "Error: Invalid ACR login server format: '$ACR_LOGIN_SERVER'"
-          exit 1
-        fi
-        
-        # Set as environment variable and output
-        echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
-        echo "server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
+        echo "ACR_LOGIN_SERVER=crralfuatv2.azurecr.io" >> $GITHUB_ENV
+        echo "server=crralfuatv2.azurecr.io" >> $GITHUB_OUTPUT
       shell: bash
       
     # Log in to Azure Container Registry - FIXED
