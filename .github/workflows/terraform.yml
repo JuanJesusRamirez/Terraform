@@ -90,19 +90,14 @@ jobs:
     - name: Extract ACR Login Server
       id: acr-login
       run: |
-        echo "Extracting ACR login server..."
-        # Use a more reliable approach to extract the value
-        ACR_LOGIN_SERVER=$(terraform output -json | jq -r '.acr_login_server.value')
-        echo "ACR login server: $ACR_LOGIN_SERVER"
-        # Set environment variable using the current GitHub Actions syntax
+        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
         echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
       working-directory: ./terraform
       
     # Log in to Azure Container Registry
     - name: Log in to Azure Container Registry
       run: |
-        # Extract only the registry name (before the first dot)
-        ACR_NAME=$(echo "${{ env.ACR_LOGIN_SERVER }}" | cut -d'.' -f1)
+        ACR_NAME=$(echo ${{ env.ACR_LOGIN_SERVER }} | cut -d'.' -f1)
         echo "Logging in to ACR: $ACR_NAME"
         az acr login --name $ACR_NAME
       
