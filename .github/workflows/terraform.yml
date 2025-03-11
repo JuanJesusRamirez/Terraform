@@ -41,7 +41,7 @@ jobs:
         
         # Set variables
         RESOURCE_GROUP_NAME="terraform-state-rg"
-        STORAGE_ACCOUNT_NAME="tfstateralfr3v2"
+        STORAGE_ACCOUNT_NAME="tfstateralfv2"
         CONTAINER_NAME="tfstate"
         LOCATION="eastus"
         
@@ -89,6 +89,6 @@ jobs:
     - name: Build and push Docker image
       run: |
         ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
-        docker build -t $ACR_LOGIN_SERVER/imgralfr3v2uat:latest .
-        docker push $ACR_LOGIN_SERVER/imgralfr3v2uat:latest
+        docker build -t $ACR_LOGIN_SERVER/imgralfuatv2:latest .
+        docker push $ACR_LOGIN_SERVER/imgralfuatv2:latest
       working-directory: ./
