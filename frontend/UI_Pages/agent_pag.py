@@ -4,7 +4,7 @@ import pandas as pd
 import random
 import os
 
-from front_utils import log_function, create_chat_excel, BaseAPIClient, wait_for_backend
+from front_utils import log_function, BaseAPIClient, wait_for_backend
 
 API_URL = os.environ.get("BACKEND_API_URL")
 
@@ -126,7 +126,6 @@ def init_state_variables():
         "conversation_list": [],
         "conversation_content": {},
         "conversation_messages": None,
-        "excel_data": None,
         "conversation_name": None,
         "current_conversation_name": None,
         "current_conversation_id": None
@@ -168,17 +167,7 @@ def run():
                 "name": st.session_state.current_conversation_name,
                 "messages": conversation_manager_client.read_conversation(st.session_state.current_conversation_id) or []
             }
-            if st.session_state.current_conversation_id is not None:
-                st.session_state.excel_data = create_chat_excel(st.session_state.conversation_content[st.session_state.current_conversation_id]["messages"])
-        
-        with l3:
-            if st.session_state.current_conversation_id is not None:
-                st.download_button(
-                    label="➡️ Export to Excel",
-                    data=st.session_state.excel_data,
-                    file_name=st.session_state.current_conversation_name + '.xlsx',
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
+           
             
         st.markdown("---")
         log_function()
