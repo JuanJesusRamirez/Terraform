@@ -91,13 +91,15 @@ jobs:
       id: acr-login
       run: |
         echo "Getting ACR login server from Terraform output..."
-        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server || echo "")
+        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server 2>/dev/null || echo "")
         if [ -z "$ACR_LOGIN_SERVER" ]; then
           echo "Error: Failed to get ACR login server from Terraform output"
           exit 1
         fi
+        # Clean any unexpected output that might be present
+        ACR_LOGIN_SERVER=$(echo "$ACR_LOGIN_SERVER" | tr -d '\n' | tr -d '\r')
         echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
-        echo "::set-output name=server::$ACR_LOGIN_SERVER"
+        echo "server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
       working-directory: ./terraform
       
     # Log in to Azure Container Registry
