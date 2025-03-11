@@ -5,7 +5,7 @@ FROM python:3.11.9
 EXPOSE 8000 8501
 
 # Crear y establecer el directorio de trabajo
-WORKDIR /RAFLR3_V2
+WORKDIR /RAFL_V2
 
 # Copiar archivos al contenedor
 COPY . .

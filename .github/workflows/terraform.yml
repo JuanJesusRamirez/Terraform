@@ -24,6 +24,16 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
         
+    - name: Register Azure Resource Providers
+      run: |
+        echo "Registering required Azure resource providers..."
+        az provider register --namespace Microsoft.App
+        az provider register --namespace Microsoft.OperationalInsights
+        
+        echo "Checking registration status..."
+        az provider show -n Microsoft.App --query registrationState -o tsv
+        az provider show -n Microsoft.OperationalInsights --query registrationState -o tsv
+        
     - name: Extract Azure Service Principal credentials
       id: extract-sp
       run: |
