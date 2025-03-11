@@ -83,30 +83,35 @@ jobs:
     # Import existing resources if needed - Check provisioning state
     - name: Check and Import Existing Resources
       run: |
-        # Check if the Container App exists and verify its provisioning state
-        if az containerapp show --name caralfuatv2 --resource-group RG_RALFV2 &>/dev/null; then
-          echo "Container App exists - checking provisioning state..."
-          
-          # Get the provisioning state
-          PROVISIONING_STATE=$(az containerapp show --name caralfuatv2 --resource-group RG_RALFV2 --query "properties.provisioningState" -o tsv)
-          echo "Current provisioning state: $PROVISIONING_STATE"
-          
-          if [ "$PROVISIONING_STATE" == "Succeeded" ]; then
-            echo "Container App is in succeeded state - importing into Terraform state..."
-            
-            # Create import script
-            echo '#!/bin/bash' > import.sh
-            echo "terraform import azurerm_container_app.app /subscriptions/${{ steps.extract-sp.outputs.subscription_id }}/resourceGroups/RG_RALFV2/providers/Microsoft.App/containerApps/caralfuatv2" >> import.sh
-            
-            chmod +x import.sh
-            ./import.sh
-          else
-            echo "Container App exists but is in $PROVISIONING_STATE state - can't import"
-            echo "Deleting failed Container App to allow fresh deployment..."
-            az containerapp delete --name caralfuatv2 --resource-group RG_RALFV2 --yes
-          fi
+        # First check if the resource is already in the Terraform state
+        if terraform state list | grep -q "azurerm_container_app.app"; then
+          echo "Container App is already in Terraform state - skipping import"
         else
-          echo "Container App doesn't exist yet - no import needed"
+          # Check if the Container App exists and verify its provisioning state
+          if az containerapp show --name caralfuatv2 --resource-group RG_RALFV2 &>/dev/null; then
+            echo "Container App exists - checking provisioning state..."
+            
+            # Get the provisioning state
+            PROVISIONING_STATE=$(az containerapp show --name caralfuatv2 --resource-group RG_RALFV2 --query "properties.provisioningState" -o tsv)
+            echo "Current provisioning state: $PROVISIONING_STATE"
+            
+            if [ "$PROVISIONING_STATE" == "Succeeded" ]; then
+              echo "Container App is in succeeded state - importing into Terraform state..."
+              
+              # Create import script
+              echo '#!/bin/bash' > import.sh
+              echo "terraform import azurerm_container_app.app /subscriptions/${{ steps.extract-sp.outputs.subscription_id }}/resourceGroups/RG_RALFV2/providers/Microsoft.App/containerApps/caralfuatv2" >> import.sh
+              
+              chmod +x import.sh
+              ./import.sh
+            else
+              echo "Container App exists but is in $PROVISIONING_STATE state - can't import"
+              echo "Deleting failed Container App to allow fresh deployment..."
+              az containerapp delete --name caralfuatv2 --resource-group RG_RALFV2 --yes
+            fi
+          else
+            echo "Container App doesn't exist yet - no import needed"
+          fi
         fi
       working-directory: ./terraform
 
