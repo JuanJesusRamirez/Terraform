@@ -79,6 +79,26 @@ jobs:
           -backend-config="client_id=${{ steps.extract-sp.outputs.client_id }}" \
           -backend-config="client_secret=${{ steps.extract-sp.outputs.client_secret }}"
       working-directory: ./terraform
+      
+    # Import existing resources if needed
+    - name: Check and Import Existing Resources
+      run: |
+        # Check if the Container App exists
+        if az containerapp show --name caralfuatv2 --resource-group RG_RALFV2 >/dev/null 2>&1; then
+          echo "Container App already exists - importing into Terraform state..."
+          
+          # Create and run import script
+          cat > import.sh << 'EOF'
+          #!/bin/bash
+          terraform import azurerm_container_app.app /subscriptions/${{ steps.extract-sp.outputs.subscription_id }}/resourceGroups/RG_RALFV2/providers/Microsoft.App/containerApps/caralfuatv2
+          EOF
+          
+          chmod +x import.sh
+          ./import.sh
+        else
+          echo "Container App doesn't exist yet - no import needed"
+        fi
+      working-directory: ./terraform
 
     # First, create only the resource group and ACR
     - name: Deploy Base Infrastructure (Resource Group and ACR)
