@@ -182,27 +182,30 @@ jobs:
         # Add REDIRECT_URI to the .env file
         echo "REDIRECT_URI=${REDIRECT_URI}" >> .env
         
-        # Read .env file and format variables for az CLI
-        ENV_VARS_FORMATTED=""
+        # Build environment variables array
+        declare -a ENV_VARS=()
+        
         while IFS= read -r line || [[ -n "$line" ]]; do
           # Skip empty lines and comments
           if [[ ! -z "$line" ]] && [[ ! "$line" =~ ^# ]]; then
-            # Extract variable name and value
+            # Extract variable name and value, preserving quotes
             if [[ "$line" =~ ^([^=]+)=(.*)$ ]]; then
               VAR_NAME="${BASH_REMATCH[1]}"
               VAR_VALUE="${BASH_REMATCH[2]}"
               
-              # Add to formatted string, handling spaces and quotes in values
-              if [[ -z "$ENV_VARS_FORMATTED" ]]; then
-                ENV_VARS_FORMATTED="${VAR_NAME}=${VAR_VALUE}"
-              else
-                ENV_VARS_FORMATTED="$ENV_VARS_FORMATTED ${VAR_NAME}=${VAR_VALUE}"
-              fi
+              # Properly escape the value
+              VAR_VALUE=$(echo "$VAR_VALUE" | sed 's/"/\\"/g')
+              
+              # Add to env vars array
+              ENV_VARS+=("$VAR_NAME=$VAR_VALUE")
             fi
           fi
         done < .env
         
         echo "Applying environment variables to Container App..."
+        
+        # Join array items with space for az CLI
+        ENV_VARS_STRING=$(IFS=' '; echo "${ENV_VARS[*]}")
         
         az containerapp update \
           --name caralfuatv2 \
@@ -210,9 +213,10 @@ jobs:
           --scale-rule-name http-scale-rule \
           --scale-rule-type http \
           --scale-rule-metadata "concurrentRequests=10" "cooldownPeriod=120" \
-          --set-env-vars $ENV_VARS_FORMATTED
+          --set-env-vars "$ENV_VARS_STRING"
         
         # Clean up
         rm -f .env
         
         echo "Container App settings updated with scale rules and all environment variables!"
+      shell: bash
