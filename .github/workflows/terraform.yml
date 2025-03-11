@@ -182,7 +182,7 @@ jobs:
           --scale-rule-name http-scale-rule \
           --scale-rule-type http \
           --scale-rule-metadata "concurrentRequests=10" "cooldownPeriod=120" \
-          --env-vars \
+          --set-env-vars \
             "API_KEY=${{ secrets.API_KEY }}" \
             "REDIRECT_URI=${REDIRECT_URI}"
         
