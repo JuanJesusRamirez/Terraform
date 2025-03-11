@@ -80,18 +80,16 @@ jobs:
           -backend-config="client_secret=${{ steps.extract-sp.outputs.client_secret }}"
       working-directory: ./terraform
       
-    # Import existing resources if needed
+    # Import existing resources if needed - FIXED HEREDOC SYNTAX
     - name: Check and Import Existing Resources
       run: |
         # Check if the Container App exists
         if az containerapp show --name caralfuatv2 --resource-group RG_RALFV2 >/dev/null 2>&1; then
           echo "Container App already exists - importing into Terraform state..."
           
-          # Create and run import script
-          cat > import.sh << 'EOF'
-          #!/bin/bash
-          terraform import azurerm_container_app.app /subscriptions/${{ steps.extract-sp.outputs.subscription_id }}/resourceGroups/RG_RALFV2/providers/Microsoft.App/containerApps/caralfuatv2
-          EOF
+          # Create import script - fixing heredoc syntax by using echo instead
+          echo '#!/bin/bash' > import.sh
+          echo "terraform import azurerm_container_app.app /subscriptions/${{ steps.extract-sp.outputs.subscription_id }}/resourceGroups/RG_RALFV2/providers/Microsoft.App/containerApps/caralfuatv2" >> import.sh
           
           chmod +x import.sh
           ./import.sh
