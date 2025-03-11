@@ -23,9 +23,22 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Extract Azure Service Principal credentials
+      id: extract-sp
+      run: |
+        echo "::set-output name=subscription_id::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')"
+        echo "::set-output name=tenant_id::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')"
+        echo "::set-output name=client_id::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')"
+        echo "::set-output name=client_secret::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')"
 
     - name: Terraform Init
-      run: terraform init
+      run: |
+        terraform init \
+          -backend-config="subscription_id=${{ steps.extract-sp.outputs.subscription_id }}" \
+          -backend-config="tenant_id=${{ steps.extract-sp.outputs.tenant_id }}" \
+          -backend-config="client_id=${{ steps.extract-sp.outputs.client_id }}" \
+          -backend-config="client_secret=${{ steps.extract-sp.outputs.client_secret }}"
       working-directory: ./terraform
 
     - name: Terraform Plan
