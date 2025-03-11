@@ -2,7 +2,7 @@
 
 # Set variables
 RESOURCE_GROUP_NAME="terraform-state-rg"
-STORAGE_ACCOUNT_NAME="tfstateralfr3v2"
+STORAGE_ACCOUNT_NAME="tfstateralfv2"
 CONTAINER_NAME="tfstate"
 LOCATION="eastus"
 
