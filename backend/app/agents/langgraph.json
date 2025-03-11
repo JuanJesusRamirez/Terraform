@@ -1,0 +1,10 @@
+{
+    "dependencies": [
+        "./backend/requirements.txt"
+    ],
+    "graphs": {
+        "agent_a": "./agent_b.py:graph",
+        "agent_b": "./agent_a.py:graph"
+    },
+    "python_version": "3.11"
+}
