@@ -182,6 +182,6 @@ jobs:
           --scale-rule-name http-scale-rule \
           --scale-rule-type http \
           --scale-rule-metadata "concurrentRequests=10" "cooldownPeriod=120" \
-          --env-vars REDIRECT_URI="${REDIRECT_URI}"
+          --set-env-vars REDIRECT_URI="${REDIRECT_URI}"
         
         echo "Container App settings updated with scale rules and environment variables including REDIRECT_URI!"
