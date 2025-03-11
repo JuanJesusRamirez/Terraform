@@ -86,20 +86,27 @@ jobs:
         terraform apply -auto-approve -target=azurerm_resource_group.example -target=azurerm_container_registry.acr
       working-directory: ./terraform
       
+    # Extract ACR login server using Terraform output
+    - name: Extract ACR Login Server
+      id: acr-login
+      run: |
+        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
+        echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
+      working-directory: ./terraform
+      
     # Log in to Azure Container Registry
     - name: Log in to Azure Container Registry
       run: |
-        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
-        az acr login --name $(echo $ACR_LOGIN_SERVER | cut -d'.' -f1)
-      working-directory: ./terraform
+        ACR_NAME=$(echo ${{ env.ACR_LOGIN_SERVER }} | cut -d'.' -f1)
+        echo "Logging in to ACR: $ACR_NAME"
+        az acr login --name $ACR_NAME
       
     # Build and push Docker image
     - name: Build and push Docker image
       run: |
-        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
-        docker build -t $ACR_LOGIN_SERVER/imgralfuatv2:latest .
-        docker push $ACR_LOGIN_SERVER/imgralfuatv2:latest
-      working-directory: ./
+        echo "Building and pushing to ${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest"
+        docker build -t ${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest .
+        docker push ${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest
 
     # Finally, deploy the rest of the infrastructure including Container App
     - name: Deploy Remaining Infrastructure
