@@ -81,10 +81,15 @@ resource "azurerm_container_app" "app" {
     }
   }
 
+  secret {
+    name  = "registry-password"
+    value = azurerm_container_registry.acr.admin_password
+  }
+
   registry {
-    server   = azurerm_container_registry.acr.login_server
-    username = azurerm_container_registry.acr.admin_username
-    password = azurerm_container_registry.acr.admin_password
+    server               = azurerm_container_registry.acr.login_server
+    username             = azurerm_container_registry.acr.admin_username
+    password_secret_name = "registry-password"
   }
 }
 
