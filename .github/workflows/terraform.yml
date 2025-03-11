@@ -90,35 +90,47 @@ jobs:
     - name: Extract ACR Login Server
       id: acr-login
       run: |
-        echo "Getting ACR login server from Terraform output..."
-        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server 2>/dev/null || echo "")
+        cd ./terraform
+        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server || echo "")
         if [ -z "$ACR_LOGIN_SERVER" ]; then
           echo "Error: Failed to get ACR login server from Terraform output"
           exit 1
         fi
-        # Clean any unexpected output that might be present
-        ACR_LOGIN_SERVER=$(echo "$ACR_LOGIN_SERVER" | tr -d '\n' | tr -d '\r')
+        echo "ACR Login Server: $ACR_LOGIN_SERVER"
         echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
-        echo "server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
-      working-directory: ./terraform
+        echo "::set-output name=server::$ACR_LOGIN_SERVER"
+      shell: bash
       
     # Log in to Azure Container Registry
     - name: Log in to Azure Container Registry
       run: |
-        if [ -z "${{ env.ACR_LOGIN_SERVER }}" ]; then
+        ACR_LOGIN_SERVER="${{ env.ACR_LOGIN_SERVER }}"
+        if [ -z "$ACR_LOGIN_SERVER" ]; then
           echo "Error: ACR_LOGIN_SERVER is not set"
           exit 1
         fi
-        ACR_NAME=$(echo "${{ env.ACR_LOGIN_SERVER }}" | cut -d'.' -f1)
+        
+        ACR_NAME=$(echo "$ACR_LOGIN_SERVER" | cut -d'.' -f1)
+        echo "ACR Name: $ACR_NAME"
+        
+        # Validate ACR name format
+        if [[ ! $ACR_NAME =~ ^[a-zA-Z0-9]+$ ]] || [ ${#ACR_NAME} -lt 5 ] || [ ${#ACR_NAME} -gt 50 ]; then
+          echo "Error: Invalid ACR name format: $ACR_NAME"
+          exit 1
+        fi
+        
         echo "Logging in to ACR: $ACR_NAME"
         az acr login --name "$ACR_NAME" || { echo "Failed to login to ACR"; exit 1; }
+      shell: bash
       
     # Build and push Docker image
     - name: Build and push Docker image
       run: |
-        echo "Building and pushing to ${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest"
-        docker build -t "${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest" . || { echo "Docker build failed"; exit 1; }
-        docker push "${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest" || { echo "Docker push failed"; exit 1; }
+        ACR_LOGIN_SERVER="${{ env.ACR_LOGIN_SERVER }}"
+        echo "Building and pushing to $ACR_LOGIN_SERVER/imgralfuatv2:latest"
+        docker build -t "$ACR_LOGIN_SERVER/imgralfuatv2:latest" . || { echo "Docker build failed"; exit 1; }
+        docker push "$ACR_LOGIN_SERVER/imgralfuatv2:latest" || { echo "Docker push failed"; exit 1; }
+      shell: bash
 
     # Finally, deploy the rest of the infrastructure including Container App
     - name: Deploy Remaining Infrastructure
