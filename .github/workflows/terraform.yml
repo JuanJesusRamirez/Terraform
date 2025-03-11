@@ -80,12 +80,10 @@ jobs:
           -backend-config="client_secret=${{ steps.extract-sp.outputs.client_secret }}"
       working-directory: ./terraform
 
-    - name: Terraform Plan
-      run: terraform plan
-      working-directory: ./terraform
-
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
+    # First, create only the resource group and ACR
+    - name: Deploy Base Infrastructure (Resource Group and ACR)
+      run: |
+        terraform apply -auto-approve -target=azurerm_resource_group.example -target=azurerm_container_registry.acr
       working-directory: ./terraform
       
     # Log in to Azure Container Registry
@@ -102,3 +100,8 @@ jobs:
         docker build -t $ACR_LOGIN_SERVER/imgralfuatv2:latest .
         docker push $ACR_LOGIN_SERVER/imgralfuatv2:latest
       working-directory: ./
+
+    # Finally, deploy the rest of the infrastructure including Container App
+    - name: Deploy Remaining Infrastructure
+      run: terraform apply -auto-approve
+      working-directory: ./terraform
