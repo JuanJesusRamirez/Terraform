@@ -159,3 +159,16 @@ jobs:
     - name: Deploy Remaining Infrastructure
       run: terraform apply -auto-approve
       working-directory: ./terraform
+      
+    # Configure the idle timeout for the Container App
+    - name: Configure Container App Idle Timeout
+      run: |
+        echo "Setting idle timeout to 120 seconds (2 minutes) for Container App..."
+        az containerapp update \
+          --name caralfuatv2 \
+          --resource-group RG_RALFV2 \
+          --scale-rule-name http-scale-rule \
+          --scale-rule-type http \
+          --scale-rule-metadata "concurrentRequests=10" "cooldownPeriod=120"
+        
+        echo "Container App scale settings updated!"

@@ -67,9 +67,13 @@ resource "azurerm_container_app" "app" {
     container {
       name   = "ralfv2-container"
       image  = "${azurerm_container_registry.acr.login_server}/imgralfuatv2:latest"
-      cpu    = 0.5
-      memory = "1Gi"
+      cpu    = 2
+      memory = "4Gi"
     }
+    
+    # Add min_replicas setting to allow scaling to zero
+    min_replicas = 0
+    max_replicas = 10
   }
 
   ingress {
