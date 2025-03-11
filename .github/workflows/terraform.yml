@@ -183,7 +183,20 @@ jobs:
           --scale-rule-type http \
           --scale-rule-metadata "concurrentRequests=10" "cooldownPeriod=120" \
           --set-env-vars \
-            "API_KEY=${{ secrets.API_KEY }}" \
+            "AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}" \
+            "AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" \
+            "AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}" \
+            "AZ_KEYVAULT_URL=${{ secrets.AZ_KEYVAULT_URL }}" \
+            "AZ_OPENAI_KEY_SECRET_NAME=${{ secrets.AZ_OPENAI_KEY_SECRET_NAME }}" \
+            "AZ_OPENAI_ENDPOINT=${{ secrets.AZ_OPENAI_ENDPOINT }}" \
+            "AZ_OPENAI_KEY_SECRET_NAME_V2=${{ secrets.AZ_OPENAI_KEY_SECRET_NAME_V2 }}" \
+            "AZ_OPENAI_ENDPOINT_V2=${{ secrets.AZ_OPENAI_ENDPOINT_V2 }}" \
+            "AZ_COSMOS_ACCOUNT_URL=${{ secrets.AZ_COSMOS_ACCOUNT_URL }}" \
+            "AZ_COSMOS_ACCOUNT_KEY_SECRET_NAME=${{ secrets.AZ_COSMOS_ACCOUNT_KEY_SECRET_NAME }}" \
+            "AZ_COSMOS_CONTAINER_NAME=${{ secrets.AZ_COSMOS_CONTAINER_NAME }}" \
+            "AZ_COSMOS_DATABASE_NAME=${{ secrets.AZ_COSMOS_DATABASE_NAME }}" \
+            "AZ_BLOB_CONNECTION_STRING_SECRET_NAME=${{ secrets.AZ_BLOB_CONNECTION_STRING_SECRET_NAME }}" \
+            "BACKEND_API_URL=${{ secrets.BACKEND_API_URL }}" \
             "REDIRECT_URI=${REDIRECT_URI}"
         
         echo "Container App settings updated with scale rules and environment variables including REDIRECT_URI!"
