@@ -80,19 +80,31 @@ jobs:
           -backend-config="client_secret=${{ steps.extract-sp.outputs.client_secret }}"
       working-directory: ./terraform
       
-    # Import existing resources if needed - FIXED HEREDOC SYNTAX
+    # Import existing resources if needed - Check provisioning state
     - name: Check and Import Existing Resources
       run: |
-        # Check if the Container App exists
-        if az containerapp show --name caralfuatv2 --resource-group RG_RALFV2 >/dev/null 2>&1; then
-          echo "Container App already exists - importing into Terraform state..."
+        # Check if the Container App exists and verify its provisioning state
+        if az containerapp show --name caralfuatv2 --resource-group RG_RALFV2 &>/dev/null; then
+          echo "Container App exists - checking provisioning state..."
           
-          # Create import script - fixing heredoc syntax by using echo instead
-          echo '#!/bin/bash' > import.sh
-          echo "terraform import azurerm_container_app.app /subscriptions/${{ steps.extract-sp.outputs.subscription_id }}/resourceGroups/RG_RALFV2/providers/Microsoft.App/containerApps/caralfuatv2" >> import.sh
+          # Get the provisioning state
+          PROVISIONING_STATE=$(az containerapp show --name caralfuatv2 --resource-group RG_RALFV2 --query "properties.provisioningState" -o tsv)
+          echo "Current provisioning state: $PROVISIONING_STATE"
           
-          chmod +x import.sh
-          ./import.sh
+          if [ "$PROVISIONING_STATE" == "Succeeded" ]; then
+            echo "Container App is in succeeded state - importing into Terraform state..."
+            
+            # Create import script
+            echo '#!/bin/bash' > import.sh
+            echo "terraform import azurerm_container_app.app /subscriptions/${{ steps.extract-sp.outputs.subscription_id }}/resourceGroups/RG_RALFV2/providers/Microsoft.App/containerApps/caralfuatv2" >> import.sh
+            
+            chmod +x import.sh
+            ./import.sh
+          else
+            echo "Container App exists but is in $PROVISIONING_STATE state - can't import"
+            echo "Deleting failed Container App to allow fresh deployment..."
+            az containerapp delete --name caralfuatv2 --resource-group RG_RALFV2 --yes
+          fi
         else
           echo "Container App doesn't exist yet - no import needed"
         fi
