@@ -91,14 +91,11 @@ jobs:
       id: acr-login
       run: |
         echo "Extracting ACR login server..."
-        # Store the output in a file to avoid issues with special characters
-        terraform output -raw acr_login_server > acr_server.txt
-        ACR_LOGIN_SERVER=$(cat acr_server.txt)
+        # Use a more reliable approach to extract the value
+        ACR_LOGIN_SERVER=$(terraform output -json | jq -r '.acr_login_server.value')
         echo "ACR login server: $ACR_LOGIN_SERVER"
-        # Set the environment variable for GitHub Actions
+        # Set environment variable using the current GitHub Actions syntax
         echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
-        # Also set as step output
-        echo "acr_login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
       working-directory: ./terraform
       
     # Log in to Azure Container Registry
