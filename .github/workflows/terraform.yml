@@ -90,23 +90,33 @@ jobs:
     - name: Extract ACR Login Server
       id: acr-login
       run: |
-        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
+        echo "Getting ACR login server from Terraform output..."
+        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server || echo "")
+        if [ -z "$ACR_LOGIN_SERVER" ]; then
+          echo "Error: Failed to get ACR login server from Terraform output"
+          exit 1
+        fi
         echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> $GITHUB_ENV
+        echo "::set-output name=server::$ACR_LOGIN_SERVER"
       working-directory: ./terraform
       
     # Log in to Azure Container Registry
     - name: Log in to Azure Container Registry
       run: |
-        ACR_NAME=$(echo ${{ env.ACR_LOGIN_SERVER }} | cut -d'.' -f1)
+        if [ -z "${{ env.ACR_LOGIN_SERVER }}" ]; then
+          echo "Error: ACR_LOGIN_SERVER is not set"
+          exit 1
+        fi
+        ACR_NAME=$(echo "${{ env.ACR_LOGIN_SERVER }}" | cut -d'.' -f1)
         echo "Logging in to ACR: $ACR_NAME"
-        az acr login --name $ACR_NAME
+        az acr login --name "$ACR_NAME" || { echo "Failed to login to ACR"; exit 1; }
       
     # Build and push Docker image
     - name: Build and push Docker image
       run: |
         echo "Building and pushing to ${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest"
-        docker build -t ${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest .
-        docker push ${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest
+        docker build -t "${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest" . || { echo "Docker build failed"; exit 1; }
+        docker push "${{ env.ACR_LOGIN_SERVER }}/imgralfuatv2:latest" || { echo "Docker push failed"; exit 1; }
 
     # Finally, deploy the rest of the infrastructure including Container App
     - name: Deploy Remaining Infrastructure
