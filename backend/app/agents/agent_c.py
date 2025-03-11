@@ -13,7 +13,7 @@ load_dotenv()
 AZ_KEYVAULT_URL = os.getenv('AZ_KEYVAULT_URL')
 AZ_OPENAI_KEY_SECRET_NAME = os.getenv('AZ_OPENAI_KEY_SECRET_NAME')
 AZ_OPENAI_ENDPOINT = os.getenv('AZ_OPENAI_ENDPOINT_V2')
-AZ_OPENAI_KEY = get_secret_value_from_keyvault(AZ_KEYVAULT_URL,"AzureOpenAIKeyRalfR3V2")
+AZ_OPENAI_KEY = get_secret_value_from_keyvault(AZ_KEYVAULT_URL,os.getenv('AZ_OPENAI_KEY_SECRET_NAME_V2'))
 
 
 os.environ["AZURE_OPENAI_API_KEY"] = AZ_OPENAI_KEY 
