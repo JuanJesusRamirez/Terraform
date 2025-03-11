@@ -8,7 +8,7 @@ terraform {
   
   backend "azurerm" {
     resource_group_name  = "terraform-state-rg"
-    storage_account_name = "tfstateralfr3v2"
+    storage_account_name = "tfstateralfv2"
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
     # NOTE: Authentication parameters (subscription_id, tenant_id, client_id, client_secret)
@@ -21,7 +21,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "example" {
-  name     = "RG_RALFR3"
+  name     = "RG_RALFV2"
   location = "East US"
   
   tags = {
@@ -32,7 +32,7 @@ resource "azurerm_resource_group" "example" {
 
 # Create Azure Container Registry
 resource "azurerm_container_registry" "acr" {
-  name                = "crralfr3v2uat"
+  name                = "crralfuatv2"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
   sku                 = "Standard"
@@ -41,7 +41,7 @@ resource "azurerm_container_registry" "acr" {
 
 # Create Log Analytics workspace for Container App Environment
 resource "azurerm_log_analytics_workspace" "logs" {
-  name                = "ralfr3v2-logs"
+  name                = "ralfv2-logs"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
   sku                 = "PerGB2018"
@@ -50,7 +50,7 @@ resource "azurerm_log_analytics_workspace" "logs" {
 
 # Create Container App Environment
 resource "azurerm_container_app_environment" "env" {
-  name                       = "caeralfr3v2uatv2"
+  name                       = "caeralfuatv2"
   resource_group_name        = azurerm_resource_group.example.name
   location                   = azurerm_resource_group.example.location
   log_analytics_workspace_id = azurerm_log_analytics_workspace.logs.id
@@ -58,15 +58,15 @@ resource "azurerm_container_app_environment" "env" {
 
 # Create Container App
 resource "azurerm_container_app" "app" {
-  name                         = "caralfr3v2uatv2"
+  name                         = "caralfuatv2"
   container_app_environment_id = azurerm_container_app_environment.env.id
   resource_group_name          = azurerm_resource_group.example.name
   revision_mode                = "Single"
 
   template {
     container {
-      name   = "ralfr3-container"
-      image  = "${azurerm_container_registry.acr.login_server}/imgralfr3v2uat:latest"
+      name   = "ralfv2-container"
+      image  = "${azurerm_container_registry.acr.login_server}/imgralfuatv2:latest"
       cpu    = 0.5
       memory = "1Gi"
     }
