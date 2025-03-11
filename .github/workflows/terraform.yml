@@ -165,15 +165,24 @@ jobs:
       run: terraform apply -auto-approve
       working-directory: ./terraform
       
-    # Configure the idle timeout for the Container App
-    - name: Configure Container App Idle Timeout
+    # Configure the Container App with idle timeout and environment variables
+    - name: Configure Container App Settings
       run: |
-        echo "Setting idle timeout to 120 seconds (2 minutes) for Container App..."
+        echo "Setting idle timeout and environment variables for Container App..."
+        
+        # Get the Container App's URL
+        APP_URL=$(az containerapp show --name caralfuatv2 --resource-group RG_RALFV2 --query "properties.configuration.ingress.fqdn" -o tsv)
+        REDIRECT_URI="https://${APP_URL}"
+        
+        echo "Container App URL: $REDIRECT_URI"
+        
         az containerapp update \
           --name caralfuatv2 \
           --resource-group RG_RALFV2 \
           --scale-rule-name http-scale-rule \
           --scale-rule-type http \
-          --scale-rule-metadata "concurrentRequests=10" "cooldownPeriod=120"
+          --scale-rule-metadata "concurrentRequests=10" "cooldownPeriod=120" \
+          --env-vars \
+            "REDIRECT_URI=${REDIRECT_URI}"
         
-        echo "Container App scale settings updated!"
+        echo "Container App settings updated with scale rules and environment variables including REDIRECT_URI!"
