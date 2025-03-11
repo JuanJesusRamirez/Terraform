@@ -35,3 +35,18 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve
       working-directory: ./terraform
+      
+    # Log in to Azure Container Registry
+    - name: Log in to Azure Container Registry
+      run: |
+        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
+        az acr login --name $(echo $ACR_LOGIN_SERVER | cut -d'.' -f1)
+      working-directory: ./terraform
+      
+    # Build and push Docker image
+    - name: Build and push Docker image
+      run: |
+        ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
+        docker build -t $ACR_LOGIN_SERVER/imgralfr3v2uat:latest .
+        docker push $ACR_LOGIN_SERVER/imgralfr3v2uat:latest
+      working-directory: ./

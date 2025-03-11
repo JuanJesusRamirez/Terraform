@@ -1,0 +1,11 @@
+-e ./backend/core
+fastapi[standard]
+langgraph
+langgraph-cli[inmem]
+streamlit
+streamlit_option_menu
+pytest
+langchain-core
+langchain-openai
+PyPDF2
+openpyxl
