@@ -9,10 +9,10 @@ from cryptography.fernet import Fernet
 
 app = FastAPI()
 
-CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
-CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET")
-TENANT_ID = os.getenv("AZURE_TENANT_ID")
-REDIRECT_URI = os.getenv("REDIRECT_URI") 
+CLIENT_ID = os.getenv("AZ_CLIENT_ID_MS_AUTH")
+CLIENT_SECRET = os.getenv("AZ_CLIENT_SECRET_MS_AUTH")
+TENANT_ID = os.getenv("Az_TENANT_ID_MS_AUTH")
+REDIRECT_URI = os.getenv("REDIRECT_URI")
 REDIRECT_AIDA = os.getenv('REDIRECT_AIDA')
 
 # Change from tenant-specific to multi-tenant authority

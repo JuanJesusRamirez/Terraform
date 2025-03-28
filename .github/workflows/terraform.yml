@@ -193,6 +193,9 @@ jobs:
             "AZ_COSMOS_DATABASE_NAME=${{ secrets.AZ_COSMOS_DATABASE_NAME }}" \
             "AZ_BLOB_CONNECTION_STRING_SECRET_NAME=${{ secrets.AZ_BLOB_CONNECTION_STRING_SECRET_NAME }}" \
             "BACKEND_API_URL=${{ secrets.BACKEND_API_URL }}" \
+            "AZ_CLIENT_ID_MS_AUTH=${{ secrets.AZ_CLIENT_ID_MS_AUTH }}" \
+            "AZ_TENANT_ID_MS_AUTH=${{ secrets.AZ_TENANT_ID_MS_AUTH }}" \
+            "AZ_CLIENT_SECRET_MS_AUTH=${{ secrets.AZ_CLIENT_SECRET_MS_AUTH }}" \
             "REDIRECT_URI=${REDIRECT_URI}"
         
         echo "Container App settings updated with scale rules and environment variables including REDIRECT_URI!"
